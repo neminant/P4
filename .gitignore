@@ -1,0 +1,14 @@
+spk_8mu/
+spk_8mu.tgz
+lp/
+lpcc/
+mfcc/
+gmm/
+build/
+.vscode/
+__MAC*
+*DS_Store
+*Zone.Identifier
+*bak
+
+!src/gmm
