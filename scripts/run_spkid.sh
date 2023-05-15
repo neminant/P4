@@ -160,7 +160,11 @@ for cmd in $*; do
        # Implement 'trainworld' in order to get a Universal Background Model for speaker verification
        #
        # - The name of the world model will be used by gmm_verify in the 'verify' command below.
+<<<<<<< HEAD
        EXEC="gmm_train -i 0 -n 40 -v 1 -T 0.001 -N 16 -m 40 -d $w/$FEAT -e $FEAT -g $w/gmm/$FEAT/$world.gmm $lists/verif/$world.train"
+=======
+        EXEC="gmm_train -i 0 -n 40 -v 1 -T 0.001 -N 16 -m 40 -d $w/$FEAT -e $FEAT -g $w/gmm/$FEAT/$world.gmm $lists/class/$world.train"
+>>>>>>> 8f160ee (caca)
         echo $EXEC && $EXEC || exit 1
 
    elif [[ $cmd == verify ]]; then
@@ -172,7 +176,11 @@ for cmd in $*; do
        #   For instance:
        #   * <code> gmm_verify ... > $LOG_VERIF </code>
        #   * <code> gmm_verify ... | tee $LOG_VERIF </code>
+<<<<<<< HEAD
        EXEC="gmm_verify -d $w/$FEAT -e $FEAT -D $w/gmm/$FEAT -w $world -E gmm lists/gmm.list lists/verif/all.test lists/verif/all.test.candidates"
+=======
+       EXEC="gmm_verify -d $w/$FEAT -e $FEAT -D $w/gmm/$FEAT -E gmm lists/gmm.list lists/verif/all.test lists/verif/all.test.candidates"
+>>>>>>> 8f160ee (caca)
        echo $EXEC && $EXEC | tee $LOG_VERIF || exit 1
 
    elif [[ $cmd == verifyerr ]]; then
