@@ -5,6 +5,8 @@
 # Please, adapt at your convinience, add cmds, etc.
 # Antonio Bonafonte, Nov. 2015
 
+set -o pipefail
+
 ## @file
 # \TODO
 # Set the proper value to variables: lists, w, name_exp and db
@@ -20,6 +22,13 @@ db=spk_8mu/speecon
 db_test=spk_8mu/sr_test
 
 world=users_and_others #others, users_and_others, #users
+
+LOG_CLASS=$w/class_${FEAT}_${name_exp}.log
+LOG_VERIF=$w/verif_${FEAT}_${name_exp}.log
+FINAL_CLASS=$w/class_test.log
+FINAL_VERIF=$w/verif_test.log
+
+TEMP_VERIF=$w/temp_${FEAT}_${name_exp}.log
 
 # ------------------------
 # Usage
@@ -148,15 +157,17 @@ for cmd in $*; do
        for dir in $db/BLOCK*/SES* ; do
            name=${dir/*\/}
            echo $name ----
-           gmm_train  -v 1 -T 0.013 -i 1 -N 60 -m 55 -d $w/$FEAT -e $FEAT -g $w/gmm/$FEAT/$name.gmm $lists/class/$name.train || exit 1
+           EXEC="gmm_train -v 1 -T 0.001 -i 1 -N 60 -m 55 -d $w/$FEAT -e $FEAT -g $w/gmm/$FEAT/$name.gmm $lists/class/$name.train"
+           echo $EXEC && $EXEC || exit 1
            echo
        done
    elif [[ $cmd == test ]]; then
-       (gmm_classify -d $w/$FEAT -e $FEAT -D $w/gmm/$FEAT -E gmm $lists/gmm.list  $lists/class/all.test | tee $w/class_${FEAT}_${name_exp}.log) || exit 1
+       EXEC="gmm_classify -d $w/$FEAT -e $FEAT -D $w/gmm/$FEAT -E gmm $lists/gmm.list  $lists/class/all.test"
+       echo $EXEC && $EXEC | tee $LOG_CLASS || exit 1
 
    elif [[ $cmd == classerr ]]; then
-       if [[ ! -s $w/class_${FEAT}_${name_exp}.log ]] ; then
-          echo "ERROR: $w/class_${FEAT}_${name_exp}.log not created"
+       if [[ ! -s $LOG_CLASS ]] ; then
+          echo "ERROR: $LOG_CLASS not created"
           exit 1
        fi
        # Count errors
@@ -173,7 +184,9 @@ for cmd in $*; do
 	   # - The name of the world model will be used by gmm_verify in the 'verify' command below.
        #echo "Implement the trainworld option ..."
        # \DONE 
-        gmm_train  -v 1 -T 0.02 -i 1 -N 35 -m 60 -d $w/$FEAT -e $FEAT -g $w/gmm/$FEAT/$world.gmm $lists/verif/$world.train || exit 1
+        EXEC="gmm_train  -v 1 -T 0.001 -i 1 -N 35 -m 60 -d $w/$FEAT -e $FEAT -g $w/gmm/$FEAT/$world.gmm $lists/verif/$world.train"
+        echo $EXEC && $EXEC || exit 1
+
    elif [[ $cmd == verify ]]; then
        ## @file
 	   # \TODO 
@@ -188,17 +201,19 @@ for cmd in $*; do
        #(gmm_verify -d $w/$FEAT -e $FEAT -D $w/gmm/$FEAT -E gmm $lists/gmm.list  $lists/verif/all.test $lists/verif/all.test.candidates |
         #     tee $w/verif_${FEAT}_${name_exp}.log) || exit 1
         
-        (gmm_verify -d $w/$FEAT -e $FEAT -D $w/gmm/$FEAT -E gmm -w $world $lists/gmm.list  $lists/verif/all.test $lists/verif/all.test.candidates |
-             tee $w/verif_${FEAT}_${name_exp}.log) || exit 1
+        EXEC="gmm_verify -d $w/$FEAT -e $FEAT -D $w/gmm/$FEAT -E gmm -w $world $lists/gmm.list  $lists/verif/all.test $lists/verif/all.test.candidates"
+        echo $EXEC && $EXEC | tee $LOG_VERIF || exit 1
+
+        echo $EXEC && $EXEC | tee $TEMP_VERIF || exit 1
 
    elif [[ $cmd == verif_err ]]; then
-       if [[ ! -s $w/verif_${FEAT}_${name_exp}.log ]] ; then
-          echo "ERROR: $w/verif_${FEAT}_${name_exp}.log not created"
+       if [[ ! -s $LOG_VERIF ]] ; then
+          echo "ERROR: $LOG_VERIF not created"
           exit 1
        fi
        # You can pass the threshold to spk_verif_score.pl or it computes the
        # best one for these particular results.
-       spk_verif_score $w/verif_${FEAT}_${name_exp}.log | tee $w/verif_${FEAT}_${name_exp}.res
+       spk_verif_score $TEMP_VERIF | tee -a $LOG_VERIF
 
    elif [[ $cmd == finalclass ]]; then
        ## @file
@@ -208,14 +223,10 @@ for cmd in $*; do
 	   # recognized is lists/final/class.test
        #echo "To be implemented ..."
        # \DONE Implementación de finalclass hecha
-           for filename in $(cat $lists/final/class.test); do
-            mkdir -p `dirname $w/$FEAT/$filename.$FEAT`
-            EXEC="wav2mfcc 8 16 24 spk_8mu/sr_test/$filename.wav $w/$FEAT/$filename.$FEAT"
-            echo $EXEC && $EXEC || exit 1
-        done 
-   
-        (gmm_classify -d $w/$FEAT -e $FEAT -D $w/gmm/$FEAT -E gmm $lists/gmm.list  $lists/final/class.test | tee class_test.log) #|| exit 1
-   
+        compute_$FEAT $db_test $lists/final/class.test
+        EXEC="gmm_classify -d $w/$FEAT -e $FEAT -D $w/gmm/$FEAT -E gmm $lists/gmm.list $lists/final/class.test"
+        echo $EXEC && $EXEC | tee $FINAL_CLASS || exit 1
+
    elif [[ $cmd == finalverif ]]; then
        ## @file
 	   # \TODO
@@ -226,17 +237,12 @@ for cmd in $*; do
        #echo "To be implemented ..."
        # \DONE 
         compute_$FEAT $db_test $lists/final/verif.test #Parametrizamos la base de datos
+        EXEC="gmm_verify -d $w/$FEAT/ -e $FEAT -D $w/gmm/$FEAT/ -E gmm -w $world lists/gmm.list lists/final/verif.test lists/final/verif.test.candidates"
+       echo $EXEC && $EXEC | tee $TEMP_VERIF || exit 1      
 
-        #(gmm_verify -d $w/$FEAT -e $FEAT -D $w/gmm/$FEAT -E gmm -w $world $lists/gmm.list  $lists/final/verif.users $lists/verif/all.test $lists/verif/verif.test.candidates |
-         #    tee $w/verif_final.log) || exit 1
-
-        (gmm_verify -d $w/$FEAT -e $FEAT -D $w/gmm/$FEAT -E gmm -w $world $lists/gmm.list  $lists/final/verif.test $lists/final/verif.test.candidates |
-             tee $w/final_verif_${FEAT}_${name_exp}.log) || exit 1
-        perl -ane 'print "$F[0]\t$F[1]\t";
-                    if ($F[2] >   0.198893935416598) {print "1\n"}  
-                    else {print "0\n"}' tee $w/final_verif_${FEAT}_${name_exp}.log | tee verif_test.log
-       
-      
+       perl -ane 'print "$F[0]\t$F[1]\t";
+            if ($F[2] >  4.5999843967767) {print "1\n"}
+            else {print "0\n"}' $TEMP_VERIF | tee $FINAL_VERIF 
    
    # If the command is not recognize, check if it is the name
    # of a feature and a compute_$FEAT function exists.

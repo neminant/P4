@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -o pipefail
+
 # Base name for temporary files
 base=/tmp/$(basename $0).$$ 
 
@@ -35,8 +37,10 @@ else
 fi
 
 # Main command for feature extration
-sox $inputfile -t raw -e signed -b 16 - | $X2X +sf | $FRAME -l 180 -p 100 | $WINDOW -l 180 -L 180 |
-	$MFCC -s $fm -l 180 -m $mfcc_order -n $melbank_order > $base.mfcc
+# sox $inputfile -t raw -e signed -b 16 - | $X2X +sf | $FRAME -l 240 -p 80 | $WINDOW -l 240 -L 80 |
+# 	$MFCC -w 1 -s 8 -l 240 -m $mfcc_order -n $mfcc_banks > $base.mfcc
+sox $inputfile -t raw -e signed -b 16 - | $X2X +sf | $FRAME -l 240 -p 80 |
+	$MFCC -s 8 -l 240 -m $mfcc_order -n $mfcc_banks > $base.mfcc
 
 # Our array files need a header with the number of cols and rows:
 ncol=$((mfcc_order)) # mfcc p =>  (a0 a1 a2 ... ap-1) 
