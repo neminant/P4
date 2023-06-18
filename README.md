@@ -72,19 +72,19 @@ ejercicios indicados.
 
 - Inserte una imagen mostrando la dependencia entre los coeficientes 2 y 3 de las tres parametrizaciones
   para todas las señales de un locutor.
-![image](https://github.com/neminant/P4/assets/125289603/59562047-d4d5-4d17-a998-0e853c86b489)
+![lp](https://github.com/neminant/P4/assets/126669600/5eb2701c-9e40-48a5-84d4-f371015f0b10)
+```plot_gmm_feat -x 2 -y 3 -f blue prueba.gmm work/lp/BLOCK02/SES025/* &```
 
+```plot_gmm_feat -x 2 -y 3 -f blue prueba.gmm work/lpcc/BLOCK02/SES025/* &```
+
+```plot_gmm_feat -x 2 -y 3 -f blue prueba.gmm work/mfcc/BLOCK02/SES025/* &```
 
   + Indique **todas** las órdenes necesarias para obtener las gráficas a partir de las señales 
     parametrizadas.
     
-fmatrix_show work/lp/BLOCK01/SES010/*.lp | egrep '^[' | cut -f4,5 > lp_2_3.txt
-
-fmatrix_show work/lpcc/BLOCK01/SES010/*.lpcc | egrep '^[' | cut -f4,5 > lpcc_2_3.txt
-
-fmatrix_show work/mfcc/BLOCK01/SES010/*.mfcc | egrep '^[' | cut -f4,5 > mfcc_2_3.txt
-
   + ¿Cuál de ellas le parece que contiene más información?
+  
+     La propiedad de correlación indica el parecido entre dos señales. Cuanto más correladas estén, menos información nueva aportarán. Como puede apreciarse en        las gráficas superiores, las gráficas de MFCC y LPCC son las que tienen los puntos más separados, es decir, las más incorreladas. Por ello, serán las que          aporten más información. En último lugar, la que aporta menos información es la de LP.
 
 Para que una parametrización contenga más información que otra, debe tener los coeficientes más incorrelados entre sí porque no queremos información redundante.
 
