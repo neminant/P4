@@ -33,22 +33,22 @@ ejercicios indicados.
   principal (`sox`, `$X2X`, `$FRAME`, `$WINDOW` y `$LPC`). Explique el significado de cada una de las 
   opciones empleadas y de sus valores.
   
-  sox: Sirve para cambiar el formato de una señal de entrada a uno de salida que nos convenga. Para saber las características de sox, escribimos sox -h en el terminal. Para la conversión se puede elegir cualquier formato de la señal de entrada y los bits utilizados entre otras cosas. 
+    **sox**: Sirve para cambiar el formato de una señal de entrada a uno de salida que nos convenga. Para saber las características de sox, escribimos sox -h en el terminal. Para la conversión se puede elegir cualquier formato de la señal de entrada y los bits utilizados entre otras cosas. 
   
-  $X2X: Programa de sptk que sirve para transformar datos input a otro formato output. La manera de utilizar este comando en el terminal es la siguiente: x2x [+type1 [+type2][–r] [–o] [%format].
+    **$X2X**: Programa de sptk que sirve para transformar datos input a otro formato output. La manera de utilizar este comando en el terminal es la siguiente: x2x [+type1 [+type2][–r] [–o] [%format].
   
-  FRAME: Extrae el frame de la secuencia de datos. -l indica la longitud del frame, y -p indica el periodo del frame.
+   **FRAME**: Extrae el frame de la secuencia de datos. -l indica la longitud del frame, y -p indica el periodo del frame.
   
-  WINDOW: Enventanado de ventana. -l indica la longitud de frames del input. -L indica la longitud de frames del output.
+   **WINDOW**: Enventanado de ventana. -l indica la longitud de frames del input. -L indica la longitud de frames del output.
   
-  LPC: Calcula los coeficientes de predicción lineal. -l indica la longitud de frames, y -m indica el orden de coeficientes LPC.
+  **LPC**: Calcula los coeficientes de predicción lineal. -l indica la longitud de frames, y -m indica el orden de coeficientes LPC.
 
 - Explique el procedimiento seguido para obtener un fichero de formato *fmatrix* a partir de los ficheros de
   salida de SPTK (líneas 45 a 51 del script `wav2lp.sh`).
 
   Primero de todo, se obtiene el fichero $base.lp con los coeficientes LPC, encadenando los comandos descritos en el apartado anterior.
 
-  Segundo, se fija una cabecera para el archivo de salida con el número de filas y columnas de la matriz. El número de columnas será el orden del LPC + 1, puesto que en la primera columna se encuentra el factor de ganancia. El número de filas será el número total de tramas a las que se les ha calculado los coeficientes LPC. Se extrae del fichero .lp convirtiendo el contenido a ASCII con X2X +fa y contando el número de líneas con el comando wc -l.
+  Segundo, se fija una cabecera para el archivo de salida con el número de filas(`nrow`) y columnas de la matriz(`ncol`). El número de columnas será el orden del LPC + 1, puesto que en la primera columna se encuentra el factor de ganancia. El número de filas será el número total de tramas a las que se les ha calculado los coeficientes LPC. Se extrae del fichero .lp convirtiendo el contenido a ASCII con X2X +fa y contando el número de líneas con el comando wc -l.
 
   * ¿Por qué es más conveniente el formato *fmatrix* que el SPTK?
 
@@ -57,12 +57,12 @@ ejercicios indicados.
 - Escriba el *pipeline* principal usado para calcular los coeficientes cepstrales de predicción lineal
   (LPCC) en su fichero <code>scripts/wav2lpcc.sh</code>:
 
-  sox $inputfile -t raw -e signed -b 16 - | $X2X +sf | $FRAME -l 240 -p 80 | $WINDOW -l 240 -L 240 | $LPC -l 240 -m $lpc_order | $LPC2C -m $lpc_order -M $nceps > $base.lpcc
+  ```sox $inputfile -t raw -e signed -b 16 - | $X2X +sf | $FRAME -l 240 -p 80 | $WINDOW -l 240 -L 240 | $LPC -l 240 -m $lpc_order | $LPC2C -m $lpc_order -M $nceps > $base.lpcc```
 
 - Escriba el *pipeline* principal usado para calcular los coeficientes cepstrales en escala Mel (MFCC) en su
   fichero <code>scripts/wav2mfcc.sh</code>:
 
-  sox $inputfile -t raw -e signed -b 16 - | $X2X +sf | $FRAME -l 240 -p 80 | $MFCC -s 8000 -n $nfiltros -l 240 -m $mfcc_order > $base.mfcc
+  ```sox $inputfile -t raw -e signed -b 16 - | $X2X +sf | $FRAME -l 240 -p 80 | $MFCC -s 8000 -n $nfiltros -l 240 -m $mfcc_order > $base.mfcc```
 
 ### Extracción de características.
 
