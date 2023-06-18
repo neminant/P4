@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -o pipefail
 # Base name for temporary files
 base=/tmp/$(basename $0).$$ 
 
@@ -10,7 +11,7 @@ cleanup() {
 }
 
 if [[ $# != 4 ]]; then
-   echo "$0 lpc_order lpcc_order input.wav output.lpcc"
+   echo "$0 lpc_order lpc2c_order input.wav output.lpcc"
    exit 1
 fi
 
@@ -19,6 +20,7 @@ lpcc_order=$2
 inputfile=$3
 outputfile=$4
 
+UBUNTU_SPTK=1
 if [[ $UBUNTU_SPTK == 1 ]]; then
    # In case you install SPTK using debian package (apt-get)
    X2X="sptk x2x"

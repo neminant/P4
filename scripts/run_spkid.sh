@@ -103,27 +103,27 @@ compute_lp() {
     shift
     for filename in $(sort $*); do
         mkdir -p `dirname $w/$FEAT/$filename.$FEAT`
-        EXEC="wav2lp 8 $db_sen/$filename.wav $w/$FEAT/$filename.$FEAT" #orden LPC
+        EXEC="wav2lp 16 $db_sen/$filename.wav $w/$FEAT/$filename.$FEAT" #orden LPC
         echo $EXEC && $EXEC || exit 1
     done
 }
 
 compute_lpcc() {
-    db_sen1=$1
+    db_sen=$1
     shift
     for filename in $(sort $*); do
         mkdir -p `dirname $w/$FEAT/$filename.$FEAT`
-        EXEC="wav2lpcc 8 13  $db_sen1/$filename.wav $w/$FEAT/$filename.$FEAT" #orden LPC y orden LPCC
+        EXEC="wav2lpcc 25 25  $db_sen/$filename.wav $w/$FEAT/$filename.$FEAT" #orden LPC y orden LPCC
         echo $EXEC && $EXEC || exit 1
     done
 }
 
 compute_mfcc() {
-    db_sen2=$1
+    db_sen=$1
     shift
     for filename in $(sort $*); do
         mkdir -p `dirname $w/$FEAT/$filename.$FEAT`
-        EXEC="wav2mfcc 8 16 24 $db_sen2/$filename.wav $w/$FEAT/$filename.$FEAT"  #Frecuencia de muestreo, orden del MFCC y orden del banco de filtros
+        EXEC="wav2mfcc 20 35 $db_sen/$filename.wav $w/$FEAT/$filename.$FEAT"  #Frecuencia de muestreo, orden del MFCC y orden del banco de filtros
         echo $EXEC && $EXEC || exit 1
     done
 }
@@ -157,7 +157,7 @@ for cmd in $*; do
        for dir in $db/BLOCK*/SES* ; do
            name=${dir/*\/}
            echo $name ----
-           EXEC="gmm_train -v 1 -T 0.001 -i 1 -N 60 -m 55 -d $w/$FEAT -e $FEAT -g $w/gmm/$FEAT/$name.gmm $lists/class/$name.train"
+           EXEC="gmm_train -v 1 -T 1.e-6 -N 256 -m 32 -i 2 -d $w/$FEAT -e $FEAT -g $w/gmm/$FEAT/$name.gmm $lists/class/$name.train"
            echo $EXEC && $EXEC || exit 1
            echo
        done
@@ -184,7 +184,7 @@ for cmd in $*; do
 	   # - The name of the world model will be used by gmm_verify in the 'verify' command below.
        #echo "Implement the trainworld option ..."
        # \DONE 
-        EXEC="gmm_train  -v 1 -T 0.001 -i 1 -N 35 -m 60 -d $w/$FEAT -e $FEAT -g $w/gmm/$FEAT/$world.gmm $lists/verif/$world.train"
+        EXEC="gmm_train -v 1 -T 1e.-6 -i 2 -N 128 -m 32 -d $w/$FEAT -e $FEAT -g $w/gmm/$FEAT/$world.gmm $lists/verif/$world.train"
         echo $EXEC && $EXEC || exit 1
 
    elif [[ $cmd == verify ]]; then
@@ -202,9 +202,7 @@ for cmd in $*; do
         #     tee $w/verif_${FEAT}_${name_exp}.log) || exit 1
         
         EXEC="gmm_verify -d $w/$FEAT -e $FEAT -D $w/gmm/$FEAT -E gmm -w $world $lists/gmm.list  $lists/verif/all.test $lists/verif/all.test.candidates"
-        echo $EXEC && $EXEC | tee $LOG_VERIF || exit 1
-
-        echo $EXEC && $EXEC | tee $TEMP_VERIF || exit 1
+        echo $EXEC && $EXEC || exit 1
 
    elif [[ $cmd == verif_err ]]; then
        if [[ ! -s $LOG_VERIF ]] ; then
@@ -225,7 +223,7 @@ for cmd in $*; do
        # \DONE Implementación de finalclass hecha
         compute_$FEAT $db_test $lists/final/class.test
         EXEC="gmm_classify -d $w/$FEAT -e $FEAT -D $w/gmm/$FEAT -E gmm $lists/gmm.list $lists/final/class.test"
-        echo $EXEC && $EXEC | tee $FINAL_CLASS || exit 1
+        echo $EXEC && $EXEC || exit 1
 
    elif [[ $cmd == finalverif ]]; then
        ## @file
@@ -238,11 +236,11 @@ for cmd in $*; do
        # \DONE 
         compute_$FEAT $db_test $lists/final/verif.test #Parametrizamos la base de datos
         EXEC="gmm_verify -d $w/$FEAT/ -e $FEAT -D $w/gmm/$FEAT/ -E gmm -w $world lists/gmm.list lists/final/verif.test lists/final/verif.test.candidates"
-       echo $EXEC && $EXEC | tee $TEMP_VERIF || exit 1      
+       echo $EXEC && $EXEC || exit 1      
 
        perl -ane 'print "$F[0]\t$F[1]\t";
             if ($F[2] >  4.5999843967767) {print "1\n"}
-            else {print "0\n"}' $TEMP_VERIF | tee $FINAL_VERIF 
+            else {print "0\n"}' $FINAL_VERIF | tee verif_test.log 
    
    # If the command is not recognize, check if it is the name
    # of a feature and a compute_$FEAT function exists.

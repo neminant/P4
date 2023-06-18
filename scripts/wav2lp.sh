@@ -54,4 +54,4 @@ nrow=`$X2X +fa < $base.lp | wc -l | perl -ne 'print $_/'$ncol', "\n";'`
 echo $nrow $ncol | $X2X +aI > $outputfile
 cat $base.lp >> $outputfile
 
-
+exit

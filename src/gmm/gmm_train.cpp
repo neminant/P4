@@ -63,15 +63,16 @@ int main(int argc, const char *argv[])
 			gmm.vq_lbg(data, nmix,  init_iterations, init_threshold, verbose);
 			break;
 		case 2:
-			gmm.em_split(data, nmix, init_iterations, init_threshold,verbose);
+			gmm.em_split(data, nmix, init_iterations, init_threshold, verbose);
 			break;
 		default:
-			gmm.vq_lbg(data, nmix,  init_iterations, init_threshold, verbose);	
+			gmm.random_init(data, nmix);	
 	}
 
 	/// \TODO Apply EM to estimate GMM parameters (complete the funcion in gmm.cpp)
 	/// \DONE
 	gmm.em(data,em_iterations, em_threshold, verbose);
+	
 	//Create directory, if it is needed
 	gmm_filename.checkDir();
 	//Save gmm
