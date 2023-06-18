@@ -91,7 +91,9 @@ Por tanto, y observando las tres gráficas, podemos deducir que los coeficientes
   parámetros 2 y 3 para un locutor, y rellene la tabla siguiente con los valores obtenidos.
   
   pearson work/lp/BLOCK01/SES010/*.lp
+  
   ![image](https://github.com/neminant/P4/assets/125289603/6cb1d15e-b130-4948-a7f8-aa5cd4bc7bb2)
+  
   pearson work/lpcc/BLOCK01/SES010/*.lpcc
   
   pearson work/mfcc/BLOCK01/SES010/*.mfcc
