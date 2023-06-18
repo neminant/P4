@@ -69,8 +69,7 @@ ejercicios indicados.
 - Inserte una imagen mostrando la dependencia entre los coeficientes 2 y 3 de las tres parametrizaciones
   para todas las señales de un locutor.
 ![image](https://github.com/neminant/P4/assets/125289603/59562047-d4d5-4d17-a998-0e853c86b489)
-![image](https://github.com/neminant/P4/assets/125289603/7b0e6a0b-a623-42a5-b855-d60d5456c2fc)
-![image](https://github.com/neminant/P4/assets/125289603/ed07012c-d190-4e24-b811-dd9989b2c099)
+
 
   + Indique **todas** las órdenes necesarias para obtener las gráficas a partir de las señales 
     parametrizadas.
