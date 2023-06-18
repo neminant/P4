@@ -95,18 +95,20 @@ Por tanto, y observando las tres gráficas, podemos deducir que los coeficientes
 - Usando el programa <code>pearson</code>, obtenga los coeficientes de correlación normalizada entre los
   parámetros 2 y 3 para un locutor, y rellene la tabla siguiente con los valores obtenidos.
   
-  pearson work/lp/BLOCK01/SES010/*.lp
+  ```pearson work/lp/BLOCK01/SES010/*.lp```
   
   ![image](https://github.com/neminant/P4/assets/125289603/6cb1d15e-b130-4948-a7f8-aa5cd4bc7bb2)
   
-  pearson work/lpcc/BLOCK01/SES010/*.lpcc
+  ```pearson work/lpcc/BLOCK01/SES010/*.lpcc```
+  ![image](https://github.com/neminant/P4/assets/126669600/b878576c-b768-4185-aada-e5d8c06bfe82)
   
-  pearson work/mfcc/BLOCK01/SES010/*.mfcc
+  ```pearson work/mfcc/BLOCK01/SES010/*.mfcc```
+![image](https://github.com/neminant/P4/assets/126669600/7fd51205-b53c-4238-9173-e5bdb0999311)
 
 
   |                        | LP   | LPCC | MFCC |
   |------------------------|:----:|:----:|:----:|
-  | &rho;<sub>x</sub>[2,3] |   -0,664123   |      |      |
+  | &rho;<sub>x</sub>[2,3] |   -0,664123   |   0.303945   |   0.0887367   |
   
   + Compare los resultados de <code>pearson</code> con los obtenidos gráficamente.
  
