@@ -46,33 +46,70 @@ ejercicios indicados.
 - Explique el procedimiento seguido para obtener un fichero de formato *fmatrix* a partir de los ficheros de
   salida de SPTK (líneas 45 a 51 del script `wav2lp.sh`).
 
+  Primero de todo, se obtiene el fichero $base.lp con los coeficientes LPC, encadenando los comandos descritos en el apartado anterior.
+
+  Segundo, se fija una cabecera para el archivo de salida con el número de filas y columnas de la matriz. El número de columnas será el orden del LPC + 1, puesto que en la primera columna se encuentra el factor de ganancia. El número de filas será el número total de tramas a las que se les ha calculado los coeficientes LPC. Se extrae del fichero .lp convirtiendo el contenido a ASCII con X2X +fa y contando el número de líneas con el comando wc -l.
+
   * ¿Por qué es más conveniente el formato *fmatrix* que el SPTK?
+
+    Porque se tiene un fácil y rápido acceso a todos los datos almacenados con una correspondencia directa entre la posición en la matriz y el orden del coeficiente y número de trama, por lo que simplifica mucho su manipulación a la hora de trabajar. También nos ofrece información directa en la cabecera sobre el número de tramas y número de coeficientes calculados.
 
 - Escriba el *pipeline* principal usado para calcular los coeficientes cepstrales de predicción lineal
   (LPCC) en su fichero <code>scripts/wav2lpcc.sh</code>:
 
+  sox $inputfile -t raw -e signed -b 16 - | $X2X +sf | $FRAME -l 240 -p 80 | $WINDOW -l 240 -L 240 | $LPC -l 240 -m $lpc_order | $LPC2C -m $lpc_order -M $nceps > $base.lpcc
+
 - Escriba el *pipeline* principal usado para calcular los coeficientes cepstrales en escala Mel (MFCC) en su
   fichero <code>scripts/wav2mfcc.sh</code>:
+
+  sox $inputfile -t raw -e signed -b 16 - | $X2X +sf | $FRAME -l 240 -p 80 | $MFCC -s 8000 -n $nfiltros -l 240 -m $mfcc_order > $base.mfcc
 
 ### Extracción de características.
 
 - Inserte una imagen mostrando la dependencia entre los coeficientes 2 y 3 de las tres parametrizaciones
   para todas las señales de un locutor.
-  
+![image](https://github.com/neminant/P4/assets/125289603/59562047-d4d5-4d17-a998-0e853c86b489)
+![image](https://github.com/neminant/P4/assets/125289603/7b0e6a0b-a623-42a5-b855-d60d5456c2fc)
+![image](https://github.com/neminant/P4/assets/125289603/ed07012c-d190-4e24-b811-dd9989b2c099)
+
   + Indique **todas** las órdenes necesarias para obtener las gráficas a partir de las señales 
     parametrizadas.
+    
+fmatrix_show work/lp/BLOCK01/SES010/*.lp | egrep '^[' | cut -f4,5 > lp_2_3.txt
+
+fmatrix_show work/lpcc/BLOCK01/SES010/*.lpcc | egrep '^[' | cut -f4,5 > lpcc_2_3.txt
+
+fmatrix_show work/mfcc/BLOCK01/SES010/*.mfcc | egrep '^[' | cut -f4,5 > mfcc_2_3.txt
+
   + ¿Cuál de ellas le parece que contiene más información?
+
+Para que una parametrización contenga más información que otra, debe tener los coeficientes más incorrelados entre sí porque no queremos información redundante.
+
+Por tanto, y observando las tres gráficas, podemos deducir que los coeficientes más incorrelados son los que se encuentran más dispersos, es decir, en nuestro caso, los coeficientes MFCC. Aún así, observamos que los coeficientes LPCC también están muy disperso y en consecuencia, incorrelados.
 
 - Usando el programa <code>pearson</code>, obtenga los coeficientes de correlación normalizada entre los
   parámetros 2 y 3 para un locutor, y rellene la tabla siguiente con los valores obtenidos.
+  
+  pearson work/lp/BLOCK01/SES010/*.lp
+  ![image](https://github.com/neminant/P4/assets/125289603/6cb1d15e-b130-4948-a7f8-aa5cd4bc7bb2)
+  pearson work/lpcc/BLOCK01/SES010/*.lpcc
+  
+  pearson work/mfcc/BLOCK01/SES010/*.mfcc
+
 
   |                        | LP   | LPCC | MFCC |
   |------------------------|:----:|:----:|:----:|
-  | &rho;<sub>x</sub>[2,3] |      |      |      |
+  | &rho;<sub>x</sub>[2,3] |   -0,664123   |      |      |
   
   + Compare los resultados de <code>pearson</code> con los obtenidos gráficamente.
+ 
+    Un valor de |ρx[2,3]| alto nos indica que los coeficientes están muy correlados y un valor bajo nos indica que los coeficientes están poco correlados (|ρx[2,3]| ∊ [0,1]). Si nos fijamos en la tabla, observamos que los resultados de pearson concuerdan con las conclusiones obtenidas al analizar las gráficas: LPC es la parametrización que nos aporta menos información con diferencia, MFCC la que más, ya que sus coeficientes están muy poco correlados, y LPCC nos aportá un poco menos de información que MFCC. Esto nos ayuda a ver que MFCC será la parametrización adecuada para optimizar nuestro sistema con diferencia.
   
 - Según la teoría, ¿qué parámetros considera adecuados para el cálculo de los coeficientes LPCC y MFCC?
+
+  Para los coeficientes LPCC se usa lpc_order=8, como esta definido en la función compute_lp(), y el número de cepstrum es igual a 3P/2 donde P=lpc_order=8 , por lo tanto, nceps=12. Finalmente, hemos decidido incrementar estos valores para obtener mejores resultados.
+
+Para los coeficientes MFCC se usan los primeros 13 coefficientes + un 50% más, por lo tanto mfcc_order=19. I el numero de filtros suele ir de 24 a 40, por lo que usamos un valor intermedio de nfilter=30.
 
 ### Entrenamiento y visualización de los GMM.
 
