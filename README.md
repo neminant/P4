@@ -72,7 +72,9 @@ ejercicios indicados.
 
 - Inserte una imagen mostrando la dependencia entre los coeficientes 2 y 3 de las tres parametrizaciones
   para todas las señales de un locutor.
+  
 ![lp](https://github.com/neminant/P4/assets/126669600/5eb2701c-9e40-48a5-84d4-f371015f0b10)
+
 ```plot_gmm_feat -x 2 -y 3 -f blue prueba.gmm work/lp/BLOCK02/SES025/* &```
 
 ```plot_gmm_feat -x 2 -y 3 -f blue prueba.gmm work/lpcc/BLOCK02/SES025/* &```
